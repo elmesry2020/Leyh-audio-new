@@ -1,1 +1,66 @@
 
+name: Generate Leyh Audio
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install audio tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          pip install edge-tts
+
+      - name: Generate all Hadith and Stories
+        run: |
+          python tts/generate_all.py \
+            --out a_staging \
+            --kinds hadith,scene \
+            --force \
+            --conc 4 \
+            --provider edge
+
+      - name: Check generated audio
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import sys
+
+          manifest = json.loads(
+              Path("tts/manifest.json").read_text(encoding="utf-8")
+          )
+
+          files = list(Path("a_staging").rglob("*.mp3"))
+          print(f"Generated MP3 files: {len(files)}")
+
+          if not files:
+              print("ERROR: No MP3 files were generated.")
+              sys.exit(1)
+          PY
+
+      - name: Save generated audio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add a_staging
+          git diff --cached --quiet || git commit -m "Generate Hadith and story audio"
+          git push
+
