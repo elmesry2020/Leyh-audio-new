@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أصوات الأحاديث النبوية</title>
+<style>
+body{font-family:sans-serif;margin:0;padding:12px;background:#111;color:#eee}
+input{width:100%;padding:10px;font-size:16px;box-sizing:border-box;margin-bottom:10px}
+.item{background:#1c1c1c;border-radius:8px;padding:10px;margin-bottom:8px}
+.item p{margin:0 0 8px;line-height:1.7}
+audio{width:100%}
+button{padding:10px 16px;margin:6px 4px}
+</style>
+</head>
+<body>
+<h2>أصوات الأحاديث النبوية</h2>
+<input id="q" placeholder="ابحث...">
+<div id="list">جارٍ التحميل...</div>
+<div style="text-align:center">
+<button id="prev">السابق</button>
+<span id="pg"></span>
+<button id="next">التالي</button>
+</div>
+<script>
+const PER=20;
+let all=[],view=[],page=0;
+
+function safeName(it){
+  let v=String(it.id??"").trim();
+  return v.replace(/[^A-Za-z0-9_-]/g,"_").slice(0,100);
+}
+
+function render(){
+  const list=document.getElementById("list");
+  list.innerHTML="";
+  const slice=view.slice(page*PER,(page+1)*PER);
+  slice.forEach(it=>{
+    const d=document.createElement("div");
+    d.className="item";
+    const p=document.createElement("p");
+    p.textContent=it.tts_text||it.text||"";
+    const a=document.createElement("audio");
+    a.controls=true;
+    a.preload="none";
+    a.src="a/"+safeName(it)+".mp3";
+    d.append(p,a);
+    list.appendChild(d);
+  });
+  document.getElementById("pg").textContent=
+    (page+1)+" / "+Math.max(1,Math.ceil(view.length/PER));
+}
+
+fetch("leyh_texts_final.json")
+  .then(r=>r.json())
+  .then(data=>{
+    all=data.filter(it=>String(it.id??"").trim());
+    view=all;
+    render();
+  })
+  .catch(e=>{
+    document.getElementById("list").textContent="خطأ في التحميل: "+e;
+  });
+
+document.getElementById("q").addEventListener("input",e=>{
+  const s=e.target.value.trim();
+  view=s?all.filter(it=>(it.tts_text||it.text||"").includes(s)):all;
+  page=0;render();
+});
+document.getElementById("next").onclick=()=>{
+  if((page+1)*PER<view.length){page++;render();window.scrollTo(0,0);}
+};
+document.getElementById("prev").onclick=()=>{
+  if(page>0){page--;render();window.scrollTo(0,0);}
+};
+</script>
+</body>
+</html>
