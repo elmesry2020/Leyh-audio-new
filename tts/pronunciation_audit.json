@@ -1,0 +1,13 @@
+{
+  "total_records": 8043,
+  "types": {
+    "hadith": 4000,
+    "scene": 4043
+  },
+  "status_counts": {
+    "processed": 4000,
+    "plain": 4043
+  },
+  "review_queue_records": 4043,
+  "warning": "Status is a heuristic, not a pronunciation certification. Unvocalized Arabic stories require human/native-speaker review or verified tashkeel; the script does not guess missing vowels."
+}
