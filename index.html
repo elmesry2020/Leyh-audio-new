@@ -24,6 +24,7 @@ button{padding:10px 16px;margin:6px 4px}
 </div>
 <script>
 const PER=20;
+const BASE="https://raw.githubusercontent.com/elmesry2020/Leyh-audio-new/main/a_staging/";
 let all=[],view=[],page=0;
 
 function safeName(it){
@@ -43,7 +44,7 @@ function render(){
     const a=document.createElement("audio");
     a.controls=true;
     a.preload="none";
-    a.src="a/"+safeName(it)+".mp3";
+    a.src=BASE+safeName(it)+".mp3";
     d.append(p,a);
     list.appendChild(d);
   });
